@@ -1,0 +1,428 @@
+Primer paso....
+
+Si no tienen instalado python3.6
+
+https://vgkits.org/blog/pip3-windows-howto/
+Asegurarse de marcar la casilla de
+agregar python al path.
+
+Crear una carpeta o proyecto llamada
+CursoPython en el editor de codigo
+de su preferencia. O el nombre que prefieran
+
+pip debe venir instalado en python3.6
+
+
+2.- virtualenv
+virtualenv es una herramienta de desarrollo
+usada para crear entornos aislados para
+Python, en los que es posible instalar paquetes sin interferir con otros virtualenvs
+ni con los paquetes de Python del sistema.
+
+Es como un administrador de paquetes
+Se asegura de que todo lo necesario
+de un proyecto, esté en el proyecto como tal
+y no dentro del sistema.
+
+Ejecutar:
+
+pip3 install virtualenv
+virtualenv <nombre del ambiente virtual>
+
+OJOOOOO si falla en ubuntu
+python3.6 -m venv env
+
+OPCIONAL: "POR CONVENCION agregar env al final del nombre"
+
+Activar el ambiente
+source <ambiente>/bin/activate
+
+
+3.- Instalando paquetes necesarios
+Flask
+pip3 flask
+
+flask-sqlalchemy
+pip3 flask-sqlalchemy
+
+
+4.- CREAR APLICACION app.py
+
+#IMPORTAR LIBRERIAS
+
+from flask import flask
+
+#Creacion de app con flask
+#__name__ es una variable
+# que python y setea al #momento de ejecutar tu
+#aplicacion, será = a #"__main__" si ésta
+#es la aplicación principal
+
+app = Flask(__name__)
+
+
+#CREACION DE RUTAS
+
+@app.route('/')
+def index():
+	return "Hola mundo"
+
+POR DEFAULT ES GET
+
+EJECUTAR APLICACION
+
+python app.py
+
+fin de primera parte
+-----------------------------
+
+SEGUNDA PARTE
+
+Vamos a aprender a usar vistas,
+css, javascript con render_template
+
+5.- CREAR 2 CARPETAS
+static
+templates
+
+#CREAR ARCHIVO index.html
+
+6.- AGREGAR render_template
+from flask import Flask, render_template
+
+#Cambiar lo siguiente
+
+@app.route('/')
+def index():
+xxx return "Hola mundo"
+--> return render_template('index.html')
+
+#NO ES NECESARIO ESPECIFICAR RUTA,
+#POR DEFECTO render_template busca en 
+#carpeta templates
+
+#Agregar al index.html
+
+<body>
+	Hola mundo de nuevo
+</body>
+
+EJECUTAR python app.py
+
+fin segunda parte
+-------------------------------
+
+7.- Haciendo un template base
+
+Crear un archivo llamado base.html
+
+8.- MODIFICANDO base.html
+Copiar contenido index.html a base.html
+
+<title>{% block head %}{% endblock %}</title>
+
+<body>
+	<!--Hola mundo de nuevo-->
+	{% block body %}{% endblock %}
+	<!-- le indicamos a python que aqui se insertará información de otros archivos -->	
+</body>
+
+9.- MODICIANDO index.html
+
+{% extends 'base.html' %}
+
+{% block head %}
+Titulo de la página
+{% endblock %}
+
+{% block body %}
+<h1>Template</h1>
+{% endblock %}
+
+Esto se hace para no estar repitiendo
+en todos los html el link a otros
+archivos como los css o los js, tambien
+para realizar templates y no estar
+repitiendo el codigo en todos los html
+
+fin tercera parte
+-----------------------------------
+
+10.- Contenido en static
+
+Crear carpeta llamada css y dentro
+Crear archivo main.css
+
+11.- Algo de css en main.css
+body, html {
+	margin: 0;
+	font-family: sans-serif;
+}
+
+.content {
+    margin: 0 auto;
+    width: 400px;
+}
+
+table, td, th {
+    border: 1px solid #aaa;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    height: 30px;
+}
+
+td {
+    text-align: center;
+    padding: 5px;
+}
+
+Realizar el link en el base.html
+ya que queremos que este css
+se repita en todos los archivos
+que vamos a crear despues
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+
+url_for() ---> Se utiliza para
+ establecer urls, URLS DIRECTAS
+ NO FUNCIONARÁN
+
+{{}} ---> Se usa para imprimir 
+algo en pantalla (strings, numeros,
+lo que sea)
+
+{%  %} para codigo python if, else,
+loops, etc
+
+importar url_for si da error
+from flask import Flask, render_template
+
+fin cuarta parte
+------------------------------------------
+
+LA BASE DE DATOS
+SQL ALCHEMY
+SQLITE
+
+11.- Importar flask_sqlalchemy en app.py
+
+from flask_sqlalchemy import SQLAlchemy
+
+12.- Realizar la configuracion de la base de datos
+
+app.config[
+	'SQLALCHEMY_DATABASE_URI'
+] = 'sqlite:///test.db'
+db = SQLAlchemy(app)
+
+13.- Crear un pequeño modelo
+
+class Tareas(db.Model):
+	id = db.Column(
+		db.Integer,
+		primary_key = True
+	)
+	contenido = db.Column(
+		db.String(200),
+		nullable = False
+	)
+	completada = db.Column(
+		db.Integer,
+		default = 0
+	)
+	fecha_creacion = db.Column(
+		db.DateTime,
+		default = datetime.utcnow
+	)
+
+14.- Creamos un método para que cada
+vez que se cree un elemento nuevo
+en la tabla Tareas, nos retorne el ID
+
+	def __repr__(self):
+		return '<Task %r>' % self.id
+
+__repr__ --> Retorna una representacion impresa de un objeto
+
+15.- Crear la BD test.db
+
+- Ir a la terminal en CursoPython
+- Activar el ambiente
+- Escribir comando python3.6
+>>>from app import db
+>>>db.create_all()
+>>>exit()
+
+Revisar que se haya creado el archivo test.db
+
+16.- index.html --> crear contenido para tabla en block de body
+
+<div class="content">
+	<h1>Administrador de tareas</h1>
+	<table>
+		<tr>
+			<th>Tarea</th>
+			<th>Creada el</th>
+			<th>Acciones</th>
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+			<td>
+				<a href="">Borrar</a>
+				<a href="">Actualizar</a>
+			</td>
+		</tr>
+	</table>
+
+	<form action="/" method="POST">
+		<input type="text" name="content" id="content">
+		<input type="submit" value="Agregar tarea">
+	</form>
+</div>
+
+- En el block del head colocamos un titulo
+
+Administrador de tareas
+
+17.- Agregamos un parámetro a la ruta para
+que acepte metodos POST y GET
+
+@app.route('/', methods=['POST', 'GET'])
+
+18.- Modificando el app.py
+
+- agregar request y redirect
+from flask import Flask, render_template, request, redirect
+
+@app.route('/', methods=['POST', 'GET'])
+def index():
+	#return "Hola mundo"
+	#return render_template('index.html')
+	if request.method == 'POST':
+		contenido_tarea = request.form['content']
+		tarea = Todo(content = contenido_tarea)
+
+		try:
+			db.session.add(tarea)
+			db.session.commit()
+			return redirect('/')
+		except:
+			return 'Hubo un error al registrar la tarea'
+	else:
+		tareas = Todo.query.order_by(
+			Todo.date_created
+		).all()
+		return render_template('index.html', tareas = tareas)
+
+19.- Modificando el index.html CONTENIDO DINAMICO
+{% for tarea in tareas %}
+	<tr>
+		<td>{{ tarea.content }}</td>
+		<td>{{ tarea.date_created.date() }}</td>
+		<td>
+			<a href="">Borrar</a>
+			<a href="">Actualizar</a>
+		</td>
+	</tr>
+{% endfor %}
+
+20.- Modificando el app.py para DELETE
+
+- Agregar route para el delete
+
+@app.route('delete/<int:id>')
+def delete(id):
+	tarea_a_eliminar = Todo.query.get_or_404(id)
+
+	try:
+		db.session.delete(tarea_a_eliminar)
+		db.session.commit()
+		return redirect('/')
+	except:
+		return 'Hubo un problema al borrar la tarea'
+
+21.- Modificando el index.html para borrar
+
+- Al enlace de Borrar agregar lo siguiente:
+
+<a href="/delete/{{tarea.id}}">Borrar</a>
+
+22.- Modificando app.py para UPDATE
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+	return 'nada por el momento'
+
+23.- Modificando index.html para UPDATE
+
+- AL enlace de Actualizar agregar lo siguiente:
+
+<a href="/update/{{tarea.id}}">Actualizar</a>
+
+24.- Creamos un template más llamado actualizar.html con el siguiente contenido
+
+{% extends 'base.html' %}
+
+{% block head %}
+Actualizar
+{% endblock %}
+
+{% block body %}
+<div class="content">
+	<h1>Actualizar tarea</h1>
+	<form action="/update/{{tarea.id}}" method="POST">
+		<input type="text" name="content" id="content" value="{{tarea.content}}">
+		<input type="submit" value="Actualizar">
+	</form>
+</div>
+{% endblock %}
+
+25.- Modificamos el app.py
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+	tarea = Todo.query.get_or_404(id)
+	if request.method == 'POST':
+		tarea.content = request.form['content']
+
+		try:
+			db.session.commit()
+			return redirect('/')
+		except:
+			return "Hubo un problema al actualizar la tarea"
+	else:
+		return render_template(
+			'actualizar.html',
+			tarea = tarea
+		)
+
+26.- Modificando index.html
+
+{% if tareas|length < 1 %}
+	<h1 style="text-align: center">No hay tareas que mostrar. Por favor, crea una.</h1>
+{% else %}
+	<table>
+		<tr>
+			<th>Tarea</th>
+			<th>Creada el</th>
+			<th>Acciones</th>
+		</tr>
+		{% for tarea in tareas %}
+			<tr>
+				<td>{{ tarea.content }}</td>
+				<td>{{ tarea.date_created.date() }}</td>
+				<td>
+					<a href="/delete/{{tarea.id}}">Borrar</a>
+					<a href="/update/{{tarea.id}}">Actualizar</a>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endif %}
